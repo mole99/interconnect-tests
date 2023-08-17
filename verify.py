@@ -90,7 +90,7 @@ def main():
                     print('Error: Unknown time scale in VCD file')
                 
                 # Get time unit of vcd and time unit of SDF, calculate conversion ratio
-                conversion = int(units[vcd.timescale] / units[timescale[0]])
+                conversion = int(units[vcd.timescale.replace(' ', '')] / units[timescale[0].replace(' ', '')])
                 print('Conversion ratio: {}'.format(conversion))
             
             interconnect = re.findall(r'\(INTERCONNECT (.*) (.*) \((.*):(.*):(.*)\) \((.*):(.*):(.*)\)\)', line)
@@ -262,7 +262,7 @@ def main():
     print('║           Simulation Summary              ║')
     print('╠═══════════════════════════════════════════╣')
     print('║ VCD File: {:<31} ║'.format(vcd_filename))
-    print('║ SDF File: {:<31} ║'.format(sdf_filename.rsplit('/', 1)[1]))
+    print('║ SDF File: {:<31} ║'.format(sdf_filename if not '/' in sdf_filename else sdf_filename.rsplit('/', 1)[1]))
     print('║ Instance: {:<31} ║'.format(module_instance))
     print('╠═══════════════════════════════════════════╣')
     print('║  Number of Interconnects: {:<4}            ║'.format(num_interconnect))
