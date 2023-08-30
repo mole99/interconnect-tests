@@ -1,6 +1,7 @@
 `default_nettype none
 /*
- * TODO
+ * A simple ALU that can add, subtract, AND, compare two 4-bit operands
+ * The result a 4-bit in size with an overflow flag OVF 
  */
 
 module alu_example (
@@ -10,46 +11,32 @@ module alu_example (
 `endif
 
     // Input A
-    input A0,
-    input A1,
-    input A2,
-    input A3,
+    input [3:0] A,
 
     // Input B
-    input B0,
-    input B1,
-    input B2,
-    input B3,
+    input [3:0] B,
 
     // Control signals
     input CTRL0,
     input CTRL1,
 
     // Result
-    output C0,
-    output C1,
-    output C2,
-    output C3,
+    output [3:0] C,
+    output OVF
 );
-    wire [3:0] A, B;
-    reg [3:0] C;
-    
-    assign A = {A3, A2, A1, A0};
-    assign B = {B3, B2, B1, B0};
+    reg [4:0] result;
     
     always @(*) begin
         case ({CTRL1, CTRL0})
-            2'd0: C = A + B;
-            2'd1: C = A - B;
-            2'd2: C = A & B;
-            2'd3: C = A > B;
+            2'd0: result = A + B;
+            2'd1: result = A - B;
+            2'd2: result = A & B;
+            2'd3: result = A > B;
         endcase
     end
     
-    assign C0 = C[0];
-    assign C1 = C[1];
-    assign C2 = C[2];
-    assign C3 = C[3];
+    assign C = result[3:0];
+    assign OVF = result[4];
 
 endmodule
 `default_nettype wire

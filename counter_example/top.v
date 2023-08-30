@@ -4,7 +4,8 @@ module top;
 
     reg CLK = 1'b0;
     reg RESET = 1'b1;
-    reg [1:0] CTRL;
+    reg LOAD = 1'b0;
+    reg [7:0] VALUE = 8'b0;
     wire [7:0] C;
     
     counter_example counter_example_inst (
@@ -16,14 +17,10 @@ module top;
         .CLK    (CLK),
         .RESET  (RESET),
         
-        .C0 (C[0]),
-        .C1 (C[1]),
-        .C2 (C[2]),
-        .C3 (C[3]),
-        .C4 (C[4]),
-        .C5 (C[5]),
-        .C6 (C[6]),
-        .C7 (C[7])
+        .LOAD   (LOAD),
+        .VALUE  (VALUE),
+        
+        .C      (C)
     );
     
     initial begin
@@ -40,7 +37,16 @@ module top;
         
         RESET = 1'b0;
         
-        #1000;
+        #500;
+        
+        VALUE = 8'd42;
+        LOAD = 1'b1;
+
+        #40;
+
+        LOAD = 1'b0;
+        
+        #500;
         
         #10 $finish;
     end

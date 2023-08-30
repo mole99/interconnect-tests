@@ -1,6 +1,9 @@
 `default_nettype none
 /*
- * TODO
+ * A simple 8-bit counter
+ * - It can be reset asynchronously via RESET
+ * - Loaded with a new value via LOAD and VALUE
+ * - And counts upon a rising edge of CLK
  */
 
 module counter_example (
@@ -12,16 +15,11 @@ module counter_example (
     // Input
     input CLK,
     input RESET,
+    input LOAD,
+    input [7:0] VALUE,
 
     // Output
-    output C0,
-    output C1,
-    output C2,
-    output C3,
-    output C4,
-    output C5,
-    output C6,
-    output C7,
+    output [7:0] C
 );
     reg [7:0] counter;
     
@@ -29,18 +27,15 @@ module counter_example (
         if (RESET == 1'b1) begin
             counter <= '0;
         end else begin
-            counter <= counter + 8'd1;
+            if (LOAD) begin
+                counter <= VALUE;
+            end else begin
+                counter <= counter + 8'd1;
+            end
         end
     end
     
-    assign C0 = counter[0];
-    assign C1 = counter[1];
-    assign C2 = counter[2];
-    assign C3 = counter[3];
-    assign C4 = counter[4];
-    assign C5 = counter[5];
-    assign C6 = counter[6];
-    assign C7 = counter[7];
+    assign C = counter;
 
 endmodule
 `default_nettype wire
