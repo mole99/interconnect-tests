@@ -91,7 +91,7 @@ module top;
         $sdf_annotate("examples/picorv32/sdf/picorv32.sdf", picorv32_inst);
     end
     
-    always #(1.25) clk = ! clk; // TODO hardened for #(1.5), fails at #(1.25)
+    always #(1.5) clk = ! clk; // TODO hardened for #(1.5), fails at #(1.25)
     
     reg [31:0] ram [256];
     
