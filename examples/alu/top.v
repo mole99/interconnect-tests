@@ -7,7 +7,7 @@ module top;
     wire [3:0] C;
     wire OVF;
     
-    alu_example alu_example_inst (
+    alu alu_inst (
     `ifdef USE_POWER_PINS
         .vccd1(1'b1),	// User area 1 1.8V supply
         .vssd1(1'b0),	// User area 1 digital ground
@@ -24,10 +24,10 @@ module top;
     );
     
     initial begin
-        $dumpfile("alu_example.vcd");
+        $dumpfile("examples/alu/alu.vcd");
         $dumpvars(0, top);
         
-        $sdf_annotate("alu_example/sdf/alu_example.sdf", alu_example_inst);
+        $sdf_annotate("examples/alu/sdf/alu.sdf", alu_inst);
     end
     
     initial begin

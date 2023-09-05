@@ -1,4 +1,4 @@
-module alu_example (CTRL0,
+module alu (CTRL0,
     CTRL1,
     OVF,
     vccd1,

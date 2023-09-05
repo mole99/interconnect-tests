@@ -1,6 +1,6 @@
 (DELAYFILE
  (SDFVERSION "3.0")
- (DESIGN "alu_example")
+ (DESIGN "alu")
  (DATE "Wed Aug 30 13:34:53 2023")
  (VENDOR "Parallax")
  (PROGRAM "STA")
@@ -11,7 +11,7 @@
  (TEMPERATURE 25.000::25.000)
  (TIMESCALE 1ns)
  (CELL
-  (CELLTYPE "alu_example")
+  (CELLTYPE "alu")
   (INSTANCE)
   (DELAY
    (ABSOLUTE

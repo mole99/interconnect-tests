@@ -8,7 +8,7 @@ module top;
     reg [7:0] VALUE = 8'b0;
     wire [7:0] C;
     
-    counter_example counter_example_inst (
+    counter counter_inst (
     `ifdef USE_POWER_PINS
         .vccd1(1'b1),	// User area 1 1.8V supply
         .vssd1(1'b0),	// User area 1 digital ground
@@ -24,10 +24,10 @@ module top;
     );
     
     initial begin
-        $dumpfile("counter_example.vcd");
+        $dumpfile("examples/counter/counter.vcd");
         $dumpvars(0, top);
         
-        $sdf_annotate("counter_example/sdf/counter_example.sdf", counter_example_inst);
+        $sdf_annotate("examples/counter/sdf/counter.sdf", counter_inst);
     end
     
     always #10 CLK = ! CLK;

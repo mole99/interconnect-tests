@@ -1,4 +1,4 @@
-module counter_example (CLK,
+module counter (CLK,
     LOAD,
     RESET,
     vccd1,

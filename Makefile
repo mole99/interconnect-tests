@@ -1,40 +1,71 @@
 default: simulate
 
+PYTHON ?= python3
 CORNER = min
-
 TOP = top
+TOOLCHAIN_PREFIX ?= riscv32-unknown-elf-
 
-COUNTER_EXAMPLE = \
-	counter_example/top.v \
-	counter_example/gl/counter_example.v \
+COUNTER_HDL = \
+	examples/counter/top.v \
+	examples/counter/gl/counter.v
 
-ALU_EXAMPLE = \
-	alu_example/top.v \
-	alu_example/gl/alu_example.v \
+ALU_HDL = \
+	examples/alu/top.v \
+	examples/alu/gl/alu.v
+
+PICORV32_HDL = \
+	examples/picorv32/top.v \
+	examples/picorv32/gl/picorv32.v
 
 CELL_LIBRARY = \
 	cell_library/primitives.v \
 	cell_library/sky130_fd_sc_hd.v
 
-alu_example.vvp: $(ALU_EXAMPLE) $(CELL_LIBRARY)
-	iverilog -o $@ -gspecify -ginterconnect -s ${TOP} $^ -T${CORNER} -D USE_POWER_PINS  # -D FUNCTIONAL
+examples/alu/alu.vvp: $(ALU_HDL) $(CELL_LIBRARY)
+	iverilog -o $@ -gspecify -ginterconnect -s ${TOP} $^ -T${CORNER} -D USE_POWER_PINS
 
-alu_example.vcd: alu_example.vvp
+examples/alu/alu.vcd: examples/alu/alu.vvp
 	vvp $^ -sdf-verbose
 
-check_alu_example: alu_example.vcd
-	python3 verify.py alu_example.vcd alu_example/sdf/alu_example.sdf top.alu_example_inst ${CORNER}
+check_alu: examples/alu/alu.vcd
+	python3 verify.py examples/alu/alu.vcd examples/alu/sdf/alu.sdf top.alu_inst ${CORNER} verbose
 
-counter_example.vvp: $(COUNTER_EXAMPLE) $(CELL_LIBRARY)
-	iverilog -o $@ -gspecify -ginterconnect -s ${TOP} $^ -T${CORNER} -D USE_POWER_PINS  # -D FUNCTIONAL
+examples/counter/counter.vvp: $(COUNTER_HDL) $(CELL_LIBRARY)
+	iverilog -o $@ -gspecify -ginterconnect -s ${TOP} $^ -T${CORNER} -D USE_POWER_PINS
 
-counter_example.vcd: counter_example.vvp
+examples/counter/counter.vcd: examples/counter/counter.vvp
 	vvp $^ -sdf-verbose
 
-check_counter_example: counter_example.vcd
-	python3 verify.py counter_example.vcd counter_example/sdf/counter_example.sdf top.counter_example_inst ${CORNER}
+check_counter: examples/counter/counter.vcd
+	python3 verify.py examples/counter/counter.vcd examples/counter/sdf/counter.sdf top.counter_inst ${CORNER} verbose
+
+examples/picorv32/picorv32.vvp: $(PICORV32_HDL) $(CELL_LIBRARY)
+	iverilog -o $@ -gspecify -ginterconnect -s ${TOP} $^ -T${CORNER} -D USE_POWER_PINS
+
+examples/picorv32/sw/start.o: picorv32/sw/start.S
+	$(TOOLCHAIN_PREFIX)gcc -c -mabi=ilp32 -march=rv32i -o $@ $<
+
+examples/picorv32/sw/program.elf: picorv32/sw/start.o picorv32/sw/sections.lds
+	$(TOOLCHAIN_PREFIX)gcc -o $@ -Os -mabi=ilp32 -march=rv32i \
+	-ffreestanding -nostartfiles -nostdlib -nodefaultlibs  \
+	-Wl,-T,picorv32/sw/sections.lds \
+	picorv32/sw/start.o
+
+examples/picorv32/sw/program.bin: picorv32/sw/program.elf
+	$(TOOLCHAIN_PREFIX)objcopy -O binary $< $@
+
+examples/picorv32/sw/program.hex: picorv32/sw/program.bin
+	$(PYTHON) picorv32/sw/makehex.py $< 256 > $@
+
+examples/picorv32/picorv32.vcd: examples/picorv32/picorv32.vvp examples/picorv32/sw/program.hex
+	vvp $^ #-sdf-verbose
+
+check_picorv32: examples/picorv32/picorv32.vcd
+	python3 verify.py examples/picorv32/picorv32.vcd examples/picorv32/sdf/picorv32.sdf top.picorv32_inst ${CORNER}
 
 clean:
-	rm -f *.vvp *.vcd
+	cd examples/alu/; rm -f *.vvp *.vcd
+	cd examples/counter/; rm -f *.vvp *.vcd
+	cd examples/picorv32/; rm -f *.vvp *.vcd
 
-.PHONY: clean check_alu_example check_counter_example
+.PHONY: clean check_alu check_counter check_picorv32
