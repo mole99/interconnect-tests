@@ -1,16 +1,26 @@
 # SDF INTERCONNECT Tests for Icarus Verilog
 
-This repository contains tests to verify the accuracy of the SDF INTERCONNECT function on Icarus Verilog.
+This repository contains tests to verify the accuracy of the SDF INTERCONNECT implementation in Icarus Verilog.
 
-Two designs were processed via OpenLane to get the gate level representation and the SDF file. The first design `alu_example` is a simple combinatorial design, the second design `counter_example` is a 8-bit counter and uses a clock.
+The designs were processed via OpenLane to get the gate level representation and the corresponding SDF file. The cells required for the simulation were extracted from the PDK and placed under `cell_library/`.
 
-The cells required for the simulation were extracted from the PDK and placed under `cell_library/`.
+First, the designs are simulated and the waveforms are generated. The Python script `verify.py` reads the resulting `.vcd` waveforms. By using the `(INTERCONNECT ...)` statements from the SDF file, the interconnect signal transition delays are compared with the specified delays in the SDF file. 
 
-First, the designs are simulated. A Python script was written to read the resulting waveforms in the `.vcd` file. Using the `(INTERCONNECT ...)` statements from the SDF file it will verify that the signals transition according to the specified delays. 
+1. `examples/alu`
+
+Implements a simple combinatorial ALU that can add, subtract, bitwise-AND as well as compare two 4-bit values.
+
+2. `examples/counter`
+
+The second design is an 8-bit counter that can be reset asynchronously via RESET, loaded with a new value via LOAD and VALUE and counts upon a rising edge of CLK.
+
+3. `examples/picorv32`
+
+This example simulates a RISC-V CPU that writes `Hello World!` to a memory location which is printed by the simulator.
 
 # Setup
 
-You will need to install a version if Icarus Verilog with SDF INTERCONNECT support (if not yet merged).
+You will need to install a recent version of Icarus Verilog with SDF INTERCONNECT support.
 
 Secondly, you will need Python 3 and the `pyDigitalWaveTools` package which you can install via:
 
@@ -20,10 +30,16 @@ Secondly, you will need Python 3 and the `pyDigitalWaveTools` package which you 
 
 The design will be simulated and the resulting waveform will be checked. You will get a simulation summary containing statistics about successfully simulated interconnection delays.
 
-To run the test for `alu_example`, execute the make target:
+To run the test for `alu`, execute the make target:
 
-	> make check_alu_example
+	> make check_alu
 
-To run the test for `counter_example`, execute the make target:
+To run the test for `counter`, execute the make target:
 
-	> make check_counter_example
+	> make check_counter
+
+To run the test for `picorv32`, execute the make target:
+
+	> make check_picorv32
+
+And be patient ;)

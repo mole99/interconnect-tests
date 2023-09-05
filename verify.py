@@ -47,15 +47,22 @@ def extract_bit(data, port_bit):
     return new_data
 
 def main():
+    verbose = None
 
-    if len(sys.argv) > 3:
+    if len(sys.argv) == 5:
         vcd_filename = sys.argv[1]
         sdf_filename = sys.argv[2]
         module_instance = sys.argv[3]
         corner = sys.argv[4]
+    elif len(sys.argv) == 6:
+        vcd_filename = sys.argv[1]
+        sdf_filename = sys.argv[2]
+        module_instance = sys.argv[3]
+        corner = sys.argv[4]
+        verbose = sys.argv[5]
     else:
-        print('Usage: verify.py vcd_filename sdf_filename module_instance corner')
-        print('Example: verify.py out.vcd design.sdf top.mod.a typ')
+        print('Usage: verify.py vcd_filename sdf_filename module_instance corner [verbose]')
+        print('Example: verify.py out.vcd design.sdf top.mod.a typ verbose')
         sys.exit(-1)
 
     with open(vcd_filename) as vcd_file:
@@ -163,22 +170,22 @@ def main():
                 expected_data = []
                 for (time, value) in data1:
                     if time > 0:
-                        if (last_value == 'x' and value == '1'): # Rising edge
+                        # Rising edge
+                        if (last_value == '0' and value == 'x' or
+                            last_value == '0' and value == 'z' or
+                            last_value == '0' and value == '1' or
+                            last_value == 'x' and value == '1' or
+                            last_value == 'z' and value == '1' ): 
                             next_time = time + delay_rising
                             if next_time <= max_sim_time:
                                 expected_data.append((next_time, value))
-                            
-                        if (last_value == 'x' and value == '0'): # Falling edge
-                            next_time = time + delay_falling
-                            if next_time <= max_sim_time:
-                                expected_data.append((next_time, value))
-                            
-                        if (last_value == '0' and value == '1'): # Rising edge
-                            next_time = time + delay_rising
-                            if next_time <= max_sim_time:
-                                expected_data.append((next_time, value))
-                            
-                        if (last_value == '1' and value == '0'): # Falling edge
+
+                        # Falling edge
+                        if (last_value == '1' and value == 'x' or
+                        last_value == '1' and value == 'z' or
+                        last_value == '1' and value == '0' or
+                        last_value == 'x' and value == '0' or
+                        last_value == 'z' and value == '0' ): 
                             next_time = time + delay_falling
                             if next_time <= max_sim_time:
                                 expected_data.append((next_time, value))
@@ -248,7 +255,8 @@ def main():
                 # All time, value pairs match!
                 if correct:
                     num_correct += 1
-                    print('[✅] Interconnect {:<10} -> {:<10} with trise = {} ps, tfall = {} ps'.format(port1_name, port2_name, delay_rising, delay_falling))
+                    if verbose:
+                        print('[✅] Interconnect {:<10} -> {:<10} with trise = {} ps, tfall = {} ps'.format(port1_name, port2_name, delay_rising, delay_falling))
                 # Something was wrong
                 else:
                     print('[❌] Interconnect {:<10} -> {:<10} with trise = {} ps, tfall = {} ps'.format(port1_name, port2_name, delay_rising, delay_falling))
@@ -265,9 +273,9 @@ def main():
     print('║ SDF File: {:<31} ║'.format(sdf_filename if not '/' in sdf_filename else sdf_filename.rsplit('/', 1)[1]))
     print('║ Instance: {:<31} ║'.format(module_instance))
     print('╠═══════════════════════════════════════════╣')
-    print('║  Number of Interconnects: {:<4}            ║'.format(num_interconnect))
-    print('║  ✅ Number of Successes:  {:<4}            ║'.format(num_correct))
-    print('║  ❌ Number of Failures:   {:<4}            ║'.format(num_interconnect-num_correct))
+    print('║  Number of Interconnects: {:<5}           ║'.format(num_interconnect))
+    print('║  ✅ Number of Successes:  {:<5}           ║'.format(num_correct))
+    print('║  ❌ Number of Failures:   {:<5}           ║'.format(num_interconnect-num_correct))
     print('║  Success Ratio            {:<6.2f} %        ║'.format(float(num_correct)/num_interconnect*100))
     print('╚═══════════════════════════════════════════╝')
 

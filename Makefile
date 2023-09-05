@@ -42,20 +42,20 @@ check_counter: examples/counter/counter.vcd
 examples/picorv32/picorv32.vvp: $(PICORV32_HDL) $(CELL_LIBRARY)
 	iverilog -o $@ -gspecify -ginterconnect -s ${TOP} $^ -T${CORNER} -D USE_POWER_PINS
 
-examples/picorv32/sw/start.o: picorv32/sw/start.S
+examples/picorv32/sw/start.o: examples/picorv32/sw/start.S
 	$(TOOLCHAIN_PREFIX)gcc -c -mabi=ilp32 -march=rv32i -o $@ $<
 
-examples/picorv32/sw/program.elf: picorv32/sw/start.o picorv32/sw/sections.lds
+examples/picorv32/sw/program.elf: examples/picorv32/sw/start.o examples/picorv32/sw/sections.lds
 	$(TOOLCHAIN_PREFIX)gcc -o $@ -Os -mabi=ilp32 -march=rv32i \
 	-ffreestanding -nostartfiles -nostdlib -nodefaultlibs  \
 	-Wl,-T,picorv32/sw/sections.lds \
 	picorv32/sw/start.o
 
-examples/picorv32/sw/program.bin: picorv32/sw/program.elf
+examples/picorv32/sw/program.bin: examples/picorv32/sw/program.elf
 	$(TOOLCHAIN_PREFIX)objcopy -O binary $< $@
 
-examples/picorv32/sw/program.hex: picorv32/sw/program.bin
-	$(PYTHON) picorv32/sw/makehex.py $< 256 > $@
+examples/picorv32/sw/program.hex: examples/picorv32/sw/program.bin
+	$(PYTHON) examples/picorv32/sw/makehex.py $< 256 > $@
 
 examples/picorv32/picorv32.vcd: examples/picorv32/picorv32.vvp examples/picorv32/sw/program.hex
 	vvp $^ #-sdf-verbose
